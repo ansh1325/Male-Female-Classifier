@@ -17,7 +17,7 @@ st.set_page_config(
 # -------------------------
 @st.cache_resource
 def load_model():
-    return joblib.load("Female_Male_model.pkl")
+    return joblib.load("Femal_Male_model.pkl")
 
 model = load_model()
 IMG_SIZE = 64
