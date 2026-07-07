@@ -15,8 +15,11 @@ st.set_page_config(
 # -------------------------
 # Load Model
 # -------------------------
-model = joblib.load("Female_Male_model.pkl")
+@st.cache_resource
+def load_model():
+    return joblib.load("Female_Male_model.pkl")
 
+model = load_model()
 IMG_SIZE = 64
 
 st.title("♂️ Male vs ♀️Female Image Classifier")
@@ -47,13 +50,23 @@ if uploaded_file is not None:
     # Convert to NumPy array
     resized = np.array(resized)
 
-    # Flatten image for Logistic Regression
-    resized = resized.flatten()
+    # -------------------------
+    # CRITICAL FIX: Pixel Normalization & Formatting
+    # -------------------------
+    # 1. Scale pixel values to 0-1 range to match training
+    resized = resized / 255.0 
+    
+    # 2. Flatten image array into a 1D vector (Size: 64 * 64 * 3 = 12288)
+    flattened_img = resized.flatten()
 
+    # 3. Reshape to a 2D array structure expected by scikit-learn: [1, 12288]
+    input_data = flattened_img.reshape(1, -1)
+
+    # -------------------------
     # Prediction
-    prediction = model.predict([resized])[0]
-
-    probability = model.predict_proba([resized])[0]
+    # -------------------------
+    prediction = model.predict(input_data)[0]
+    probability = model.predict_proba(input_data)[0]
 
     # Display prediction
     if prediction == 0:
